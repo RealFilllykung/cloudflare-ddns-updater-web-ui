@@ -3,6 +3,7 @@
 import { existsSync, mkdirSync } from 'fs'
 import path from 'path'
 import { prisma } from '@/lib/prisma'
+import { execSync } from 'child_process'
 
 export async function initializeDb() {
   try {
@@ -12,6 +13,9 @@ export async function initializeDb() {
       console.log('Creating database folder...')
       mkdirSync(dbFolderPath, { recursive: true })
     }
+
+    console.log('Setting up database schema...')
+    execSync('npx prisma db push', { stdio: 'inherit' })
 
     // Test database connection
     await prisma.$connect()
