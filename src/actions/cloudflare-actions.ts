@@ -51,14 +51,17 @@ export async function updateDnsRecord(credentials: CloudflareCredential, recordI
 }
 
 // Main action: update or create DNS record for current public IP
-export async function upsertDnsRecord(credentials: CloudflareCredential, record: Omit<CloudflareDnsRecord, 'id' | 'content'>) {
+export async function upsertDnsRecord(credentials: CloudflareCredential, record: Omit<CloudflareDnsRecord, 'id' | 'content' | 'proxied'>) {
   const ip = await getPublicIp()
   const all = await listDnsRecords(credentials)
   const match = all.find((r: any) => r.name === record.name && r.type === record.type)
-  const recordData = { ...record, content: ip }
   if (match) {
+    // Preserve the proxied value from Cloudflare
+    const recordData = { ...record, content: ip, proxied: match.proxied }
     return updateDnsRecord(credentials, match.id, recordData)
   } else {
+    // Always set proxied to false for new records
+    const recordData = { ...record, content: ip, proxied: false }
     return createDnsRecord(credentials, recordData)
   }
 }

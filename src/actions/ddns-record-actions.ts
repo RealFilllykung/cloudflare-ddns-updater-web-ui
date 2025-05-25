@@ -25,9 +25,8 @@ export async function createDnsRecord(record: Omit<DnsRecord, 'id'>) {
       {
         type: 'A',
         name: record.domain,
-        proxied: true,
         ttl: 3600,
-        comment: 'Domain verification record',
+        comment: 'Record created by Cloudflare DDNS updater web UI on ' + new Date().toLocaleString(),
       }
     )
     // Save to local DB
@@ -60,9 +59,8 @@ export async function updateDnsRecord(id: string, data: Omit<DnsRecord, 'id'>) {
       {
         type: 'A',
         name: data.domain,
-        proxied: true,
         ttl: 3600,
-        comment: 'Domain verification record',
+        comment: 'Updated by Cloudflare DDNS updater web UI on ' + new Date().toLocaleString(),
       }
     )
     // Update local DB
