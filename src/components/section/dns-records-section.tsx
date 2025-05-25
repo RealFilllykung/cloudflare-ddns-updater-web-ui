@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Credential } from "./credentials-section"
+import { createDnsRecord, updateDnsRecord, deleteDnsRecord, getAllDnsRecords } from "@/actions/ddns-record-actions"
 
 export interface DnsRecord {
   id: string
@@ -52,38 +53,59 @@ export function DnsRecordsSection({ credentials, dnsRecords, setDnsRecords }: Dn
     domain: "",
   })
 
-  const handleRecordSubmit = () => {
+  // Fetch DNS records on component mount
+  useEffect(() => {
+    const fetchDnsRecords = async () => {
+      const result = await getAllDnsRecords()
+      if (result.success) {
+        setDnsRecords(result.data)
+      } else {
+        console.error("Failed to fetch DNS records:", result.error)
+      }
+    }
+
+    fetchDnsRecords()
+  }, [setDnsRecords])
+
+  const handleRecordSubmit = async () => {
     if (!recordForm.credentialId || !recordForm.domain) return
 
     const credential = credentials.find((cred) => cred.id === recordForm.credentialId)
     if (!credential) return
 
     if (editingRecord) {
-      setDnsRecords((prev) =>
-        prev.map((record) =>
-          record.id === editingRecord.id
-            ? {
-                ...record,
-                credentialId: recordForm.credentialId,
-                credentialName: credential.name,
-                domain: recordForm.domain,
-              }
-            : record
+      const result = await updateDnsRecord(editingRecord.id, {
+        credentialId: recordForm.credentialId,
+        credentialName: credential.name,
+        domain: recordForm.domain,
+        currentIp: editingRecord.currentIp,
+        lastUpdate: new Date().toLocaleString(),
+      })
+
+      if (result.success) {
+        setDnsRecords((prev) =>
+          prev.map((record) => (record.id === editingRecord.id ? result.data : record))
         )
-      )
+        resetRecordForm()
+      } else {
+        console.error("Failed to update DNS record:", result.error)
+      }
     } else {
-      const newRecord: DnsRecord = {
-        id: Date.now().toString(),
+      const result = await createDnsRecord({
         credentialId: recordForm.credentialId,
         credentialName: credential.name,
         domain: recordForm.domain,
         currentIp: "192.168.1.100", // Mock IP
         lastUpdate: new Date().toLocaleString(),
-      }
-      setDnsRecords((prev) => [...prev, newRecord])
-    }
+      })
 
-    resetRecordForm()
+      if (result.success) {
+        setDnsRecords((prev) => [...prev, result.data])
+        resetRecordForm()
+      } else {
+        console.error("Failed to create DNS record:", result.error)
+      }
+    }
   }
 
   const resetRecordForm = () => {
@@ -101,8 +123,13 @@ export function DnsRecordsSection({ credentials, dnsRecords, setDnsRecords }: Dn
     setRecordDialog(true)
   }
 
-  const handleDeleteRecord = (recordId: string) => {
-    setDnsRecords((prev) => prev.filter((record) => record.id !== recordId))
+  const handleDeleteRecord = async (recordId: string) => {
+    const result = await deleteDnsRecord(recordId)
+    if (result.success) {
+      setDnsRecords((prev) => prev.filter((record) => record.id !== recordId))
+    } else {
+      console.error("Failed to delete DNS record:", result.error)
+    }
   }
 
   return (
