@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:../database/ddns.db"
 }
 
 model Credential {
@@ -15,6 +15,7 @@ model Credential {
   name        String
   zoneId      String
   apiKey      String
+  email       String
   dnsRecords  DnsRecord[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
