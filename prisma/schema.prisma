@@ -15,6 +15,7 @@ model Credential {
   name        String
   zoneId      String
   apiKey      String
+  email       String
   dnsRecords  DnsRecord[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

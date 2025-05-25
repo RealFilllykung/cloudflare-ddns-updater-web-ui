@@ -24,11 +24,13 @@ export async function createCredential(credential: Omit<Credential, 'id'>) {
   }
 }
 
-export async function updateCredential(id: string, data: Omit<Credential, 'id'>) {
+export async function updateCredential(id: string, credential: Omit<Credential, 'id'>) {
   try {
     const updatedCredential = await prisma.credential.update({
       where: { id },
-      data
+      data: {
+        ...credential
+      }
     })
     return { success: true, data: updatedCredential }
   } catch (error) {

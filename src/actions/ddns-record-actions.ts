@@ -1,5 +1,6 @@
 'use server'
 
+import { upsertDnsRecord } from './cloudflare-actions'
 import { prisma } from '@/lib/prisma'
 import type { DnsRecord } from '@/components/section/dns-records-section'
 
@@ -11,11 +12,30 @@ type Result<T> = {
 
 export async function createDnsRecord(record: Omit<DnsRecord, 'id'>) {
   try {
+    // Get credential for Cloudflare
+    const credential = await prisma.credential.findUnique({ where: { id: record.credentialId } })
+    if (!credential) throw new Error('Credential not found')
+    // Upsert Cloudflare record
+    await upsertDnsRecord(
+      {
+        email: credential.email,
+        apiKey: credential.apiKey,
+        zoneId: credential.zoneId,
+      },
+      {
+        type: 'A',
+        name: record.domain,
+        proxied: true,
+        ttl: 3600,
+        comment: 'Domain verification record',
+      }
+    )
+    // Save to local DB
     const newRecord = await prisma.dnsRecord.create({
       data: {
         id: Date.now().toString(),
         ...record,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       }
     })
     return { success: true, data: { ...newRecord, lastUpdate: newRecord.lastUpdate.toLocaleString() } }
@@ -27,11 +47,30 @@ export async function createDnsRecord(record: Omit<DnsRecord, 'id'>) {
 
 export async function updateDnsRecord(id: string, data: Omit<DnsRecord, 'id'>) {
   try {
+    // Get credential for Cloudflare
+    const credential = await prisma.credential.findUnique({ where: { id: data.credentialId } })
+    if (!credential) throw new Error('Credential not found')
+    // Upsert Cloudflare record
+    await upsertDnsRecord(
+      {
+        email: credential.email,
+        apiKey: credential.apiKey,
+        zoneId: credential.zoneId,
+      },
+      {
+        type: 'A',
+        name: data.domain,
+        proxied: true,
+        ttl: 3600,
+        comment: 'Domain verification record',
+      }
+    )
+    // Update local DB
     const updatedRecord = await prisma.dnsRecord.update({
       where: { id },
       data: {
         ...data,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       }
     })
     return { success: true, data: { ...updatedRecord, lastUpdate: updatedRecord.lastUpdate.toLocaleString() } }

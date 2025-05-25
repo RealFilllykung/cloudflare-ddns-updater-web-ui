@@ -33,6 +33,7 @@ export interface Credential {
   name: string
   zoneId: string
   apiKey: string
+  email: string
 }
 
 interface CredentialsSectionProps {
@@ -48,6 +49,7 @@ export function CredentialsSection({ credentials, setCredentials, setDnsRecords 
     name: "",
     zoneId: "",
     apiKey: "",
+    email: "",
   })
   const [showZoneId, setShowZoneId] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
@@ -91,7 +93,7 @@ export function CredentialsSection({ credentials, setCredentials, setDnsRecords 
   }
 
   const resetCredentialForm = () => {
-    setCredentialForm({ name: "", zoneId: "", apiKey: "" })
+    setCredentialForm({ name: "", zoneId: "", apiKey: "", email: "" })
     setEditingCredential(null)
     setCredentialDialog(false)
     setShowZoneId(false)
@@ -104,6 +106,7 @@ export function CredentialsSection({ credentials, setCredentials, setDnsRecords 
       name: credential.name,
       zoneId: credential.zoneId,
       apiKey: credential.apiKey,
+      email: credential.email
     })
     setCredentialDialog(true)
   }
@@ -185,6 +188,16 @@ export function CredentialsSection({ credentials, setCredentials, setDnsRecords 
                     {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={credentialForm.email}
+                  onChange={(e) => setCredentialForm((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="Enter your email"
+                />
               </div>
             </div>
             <DialogFooter>
