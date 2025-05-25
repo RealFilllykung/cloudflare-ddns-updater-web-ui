@@ -1,22 +1,16 @@
-import { prisma } from './prisma'
-import { ensureDbFolder } from './ensure-db-folder'
+import { initializeDb } from '@/actions/db-actions'
 
 export async function initDatabase() {
   try {
-    // Ensure database folder exists
-    ensureDbFolder()
-
-    // Test database connection
-    await prisma.$connect()
+    const result = await initializeDb()
     
-    // Get counts to verify tables exist
-    const credentialCount = await prisma.credential.count()
-    const dnsRecordCount = await prisma.dnsRecord.count()
-    
-    console.log('Database initialized successfully:')
-    console.log(`- ${credentialCount} credentials`)
-    console.log(`- ${dnsRecordCount} DNS records`)
-
+    if (result.success) {
+      console.log('Database initialized successfully:')
+      console.log(`- ${result.credentialCount} credentials`)
+      console.log(`- ${result.dnsRecordCount} DNS records`)
+    } else {
+      throw new Error(result.error)
+    }
   } catch (error) {
     console.error('Failed to initialize database:', error)
     throw error
