@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { createCredential, updateCredential, deleteCredential, getAllCredentials } from "@/actions/credential-actions"
 
 export interface Credential {
   id: string
@@ -51,22 +52,42 @@ export function CredentialsSection({ credentials, setCredentials, setDnsRecords 
   const [showZoneId, setShowZoneId] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
 
-  const handleCredentialSubmit = () => {
+  // Fetch credentials on component mount
+  useEffect(() => {
+    const fetchCredentials = async () => {
+      const result = await getAllCredentials()
+      if (result.success) {
+        setCredentials(result.data)
+      } else {
+        console.error("Failed to fetch credentials:", result.error)
+      }
+    }
+
+    fetchCredentials()
+  }, [setCredentials])
+
+  const handleCredentialSubmit = async () => {
     if (!credentialForm.name || !credentialForm.zoneId || !credentialForm.apiKey) return
 
     if (editingCredential) {
-      setCredentials((prev) =>
-        prev.map((cred) => (cred.id === editingCredential.id ? { ...cred, ...credentialForm } : cred))
-      )
-    } else {
-      const newCredential: Credential = {
-        id: Date.now().toString(),
-        ...credentialForm,
+      const result = await updateCredential(editingCredential.id, credentialForm)
+      if (result.success) {
+        setCredentials((prev) =>
+          prev.map((cred) => (cred.id === editingCredential.id ? result.data : cred))
+        )
+        resetCredentialForm()
+      } else {
+        console.error("Failed to update credential:", result.error)
       }
-      setCredentials((prev) => [...prev, newCredential])
+    } else {
+      const result = await createCredential(credentialForm)
+      if (result.success) {
+        setCredentials((prev) => [...prev, result.data])
+        resetCredentialForm()
+      } else {
+        console.error("Failed to create credential:", result.error)
+      }
     }
-
-    resetCredentialForm()
   }
 
   const resetCredentialForm = () => {
@@ -87,9 +108,14 @@ export function CredentialsSection({ credentials, setCredentials, setDnsRecords 
     setCredentialDialog(true)
   }
 
-  const handleDeleteCredential = (credentialId: string) => {
-    setCredentials((prev) => prev.filter((cred) => cred.id !== credentialId))
-    setDnsRecords((prev) => prev.filter((record) => record.credentialId !== credentialId))
+  const handleDeleteCredential = async (credentialId: string) => {
+    const result = await deleteCredential(credentialId)
+    if (result.success) {
+      setCredentials((prev) => prev.filter((cred) => cred.id !== credentialId))
+      setDnsRecords((prev) => prev.filter((record) => record.credentialId !== credentialId))
+    } else {
+      console.error("Failed to delete credential:", result.error)
+    }
   }
 
   return (
