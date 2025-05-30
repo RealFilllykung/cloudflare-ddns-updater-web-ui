@@ -14,7 +14,7 @@ public class BackendApplication {
 		SpringApplication.run(BackendApplication.class, args);
 	}
 
-		public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
 		return args -> {
 
 			System.out.println("Let's inspect the beans provided by Spring Boot:");
