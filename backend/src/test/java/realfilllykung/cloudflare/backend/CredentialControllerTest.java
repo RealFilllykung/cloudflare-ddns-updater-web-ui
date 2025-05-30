@@ -21,7 +21,7 @@ public class CredentialControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void getHello() throws Exception {
+    public void GivenBlankBody_WhenCallingGetCredentials_ThenReturnCredentials() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/credentials").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Hello World")));
