@@ -1,10 +1,9 @@
-package realfilllykung.cloudflare.backend.models;
+package realfilllykung.cloudflare.backend.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 
 public class Credential { 
     @NotBlank(message = "credentialName should not be blank")
@@ -24,4 +23,11 @@ public class Credential {
     @NotNull(message = "email should not be null")
     @Email(message = "email should be a valid email address")
     public String email; 
+
+    public Credential(String credentialName, String zoneIdentifierId, String apiKey, String email) {
+        this.credentialName = credentialName;
+        this.zoneIdentifierId = zoneIdentifierId;
+        this.apiKey = apiKey;
+        this.email = email;
+    }
 }
