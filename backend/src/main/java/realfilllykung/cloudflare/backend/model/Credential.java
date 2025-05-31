@@ -30,4 +30,32 @@ public class Credential {
         this.apiKey = apiKey;
         this.email = email;
     }
+
+    public void setCredentialName(String credentialName) {
+        this.credentialName = credentialName;
+    }
+
+    public String getZoneIdentifierId() {
+        return zoneIdentifierId;
+    }
+
+    public void setZoneIdentifierId(String zoneIdentifierId) {
+        this.zoneIdentifierId = zoneIdentifierId;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
